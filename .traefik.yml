@@ -1,0 +1,15 @@
+displayName: request dispatch
+type: middleware
+import: github.com/qxsugar/request-dispatch
+summary:
+
+testData:
+  request-dispatch:
+    logLevel: DEBUG
+    markerHeader: X-Tag
+    markerHosts:
+      alpha:
+        - http://alpha.api.com
+        - http://alpha1.api.com
+      beta:
+        - http://beta.api.com
