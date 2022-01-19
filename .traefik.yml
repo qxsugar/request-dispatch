@@ -6,8 +6,8 @@ summary: a requests dispatch plugin
 testData:
   request-dispatch:
     logLevel: DEBUG
-    markerHeader: X-Tag
-    markerHosts:
+    markHeader: X-Tag
+    markHosts:
       alpha:
         - http://alpha.api.com
         - http://alpha1.api.com

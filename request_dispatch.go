@@ -10,8 +10,8 @@ import (
 
 type Config struct {
 	LogLevel     string              `json:"logLevel"`
-	MarkerHeader string              `json:"markerHeader"`
-	MarkerHosts  map[string][]string `json:"markerHosts"`
+	MarkHeader string              `json:"markHeader"`
+	MarkHosts  map[string][]string `json:"markHosts"`
 }
 
 func CreateConfig() *Config {
@@ -35,9 +35,9 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 }
 
 func (d *Dispatch) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	markerValue := req.Header.Get(d.config.MarkerHeader)
-	if markerValue != "" {
-		if hosts, ok := d.config.MarkerHosts[markerValue]; ok {
+	markValue := req.Header.Get(d.config.MarkHeader)
+	if markValue != "" {
+		if hosts, ok := d.config.MarkHosts[markValue]; ok {
 			host := hosts[rand.Intn(len(hosts))]
 			target, err := url.ParseRequestURI(host)
 			if err == nil {

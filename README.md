@@ -1,7 +1,7 @@
 traefik 请求分发插件
 ------------------
 
-根据请求marker做请求转发，实现灰度功能
+根据请求mark做请求转发，实现灰度功能
 
 ## 配置
 
@@ -37,8 +37,8 @@ http:
       plugin:
         requst-dispatch:
           logLevel: DEBUG
-          markerHeader: X-Tag
-          markerHosts:
+          markHeader: X-Tag
+          markHosts:
             alpha:
               - http://alpha.api.cn
               - http://alpha1.api.cn
@@ -48,7 +48,7 @@ http:
 
 ## 使用
 
-如果请求头带有markerHeader的参数，请求将会被分发到对应的地址
+如果请求头带有markHeader的参数，请求将会被分发到对应的地址
 
 > http api.test.cn X-Tag:alpha -v # 请求会被分发到`http://alpha.api.cn`或`http://alpha1.api.cn`
 >
