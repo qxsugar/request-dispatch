@@ -1,7 +1,7 @@
 displayName: request dispatch
 type: middleware
 import: github.com/qxsugar/request-dispatch
-summary:
+summary: a requests dispatch plugin
 
 testData:
   request-dispatch:
