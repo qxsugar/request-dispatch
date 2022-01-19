@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	LogLevel     string              `json:"logLevel"`
+	LogLevel   string              `json:"logLevel"`
 	MarkHeader string              `json:"markHeader"`
 	MarkHosts  map[string][]string `json:"markHosts"`
 }
