@@ -60,5 +60,9 @@ func (d *Dispatch) reverseProxy(rw http.ResponseWriter, req *http.Request, targe
 	// replace the host of request, otherwise it will cause incorrect parsing
 	req.Host = target.Host
 	proxy := httputil.NewSingleHostReverseProxy(target)
+	proxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, err error) {
+		d.logger.Error("ReverseProxy failed", "error", err)
+		d.next.ServeHTTP(rw, req)
+	}
 	proxy.ServeHTTP(rw, req)
 }
