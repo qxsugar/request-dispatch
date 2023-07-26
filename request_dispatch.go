@@ -44,24 +44,25 @@ func (d *Dispatch) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 				d.reverseProxy(rw, req, target)
 				return
 			} else {
-				d.logger.Debug("ParseRequestURI failed", "error", err, "url", host)
+				d.logger.Error("failed to parse request uri, uri: ", host, "error: ", err)
 			}
 		}
 	}
 
-	// default
+	// default router
 	d.next.ServeHTTP(rw, req)
 	return
 }
 
 func (d *Dispatch) reverseProxy(rw http.ResponseWriter, req *http.Request, target *url.URL) {
-	d.logger.Debug("ReverseProxy", "from", req.URL, "to", target)
+	d.logger.Debug("reverse proxy, from: ", req.URL, "to: ", target)
 
 	// replace the host of request, otherwise it will cause incorrect parsing
 	req.Host = target.Host
+	// FIXME cache proxy?
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	proxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, err error) {
-		d.logger.Error("ReverseProxy failed", "error", err)
+		d.logger.Error("failed to reverse proxy, will be use default ServeHTTP, error: ", err)
 		d.next.ServeHTTP(rw, req)
 	}
 	proxy.ServeHTTP(rw, req)

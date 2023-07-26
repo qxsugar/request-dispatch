@@ -57,8 +57,8 @@ func getLogLevel(level string) LogLevel {
 func NewLogger(level string) *Logger {
 	return &Logger{
 		logLevel:    getLogLevel(level),
-		loggerInfo:  log.New(os.Stdout, "INFO: [AB_TEST] ", log.Ldate|log.Ltime|log.Lshortfile),
-		loggerDebug: log.New(os.Stdout, "DEBU: [AB_TEST] ", log.Ldate|log.Ltime|log.Lshortfile),
-		loggerError: log.New(os.Stdout, "ERRO: [AB_TEST] ", log.Ldate|log.Ltime|log.Lshortfile),
+		loggerInfo:  log.New(os.Stdout, "INFO: [REQUEST_DISPATCH] ", log.Ldate|log.Ltime|log.Lshortfile),
+		loggerDebug: log.New(os.Stdout, "DEBUG: [REQUEST_DISPATCH] ", log.Ldate|log.Ltime|log.Lshortfile),
+		loggerError: log.New(os.Stdout, "ERROR: [REQUEST_DISPATCH] ", log.Ldate|log.Ltime|log.Lshortfile),
 	}
 }

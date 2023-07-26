@@ -1,21 +1,21 @@
-traefik 请求分发插件
+traefik request dispatch plug-in
 ------------------
 
-根据请求mark做请求转发，实现灰度功能
+According to the request mark to do request dispatch, to achieve gray function
 
-## 配置
+## configuration
 
-1. 启用插件配置
+1. configuration plug-in configuration
 
 ```yaml
 experimental:
   plugins:
-    requst-dispatch:
+    request-dispatch:
       moduleName: github.com/qxsugar/request-dispatch
       version: v1.0.1
 ```
 
-2. 路由配置
+2. route configuration
 
 ```yaml
 http:
@@ -26,32 +26,32 @@ http:
       entryPoints:
         - web
       middlewares:
-        - requst-dispatch
+        - request-dispatch
   services:
     svc:
       loadBalancer:
         servers:
-          - url: "http://prod.api.cn"
+          - url: "https://prod.api.cn"
   middlewares:
-    requst-dispatch:
+    request-dispatch:
       plugin:
-        requst-dispatch:
+        request-dispatch:
           logLevel: DEBUG
-          markHeader: X-Tag
+          markHeader: X-DISPATCH
           markHosts:
             alpha:
-              - http://alpha.api.cn
-              - http://alpha1.api.cn
+              - https://alpha.api.cn
+              - https://alpha1.api.cn
             beta:
-              - http://beta.api.cn
+              - https://beta.api.cn
 ```
 
 ## 使用
 
-如果请求头带有markHeader的参数，请求将会被分发到对应的地址
+If the request header takes the mark header parameter, the request will be dispatch to the appropriate address
 
-> http api.test.cn X-Tag:alpha -v # 请求会被分发到`http://alpha.api.cn`或`http://alpha1.api.cn`
+> http api.test.cn X-DISPATCH:alpha -v # the request will be dispatch to `https://alpha.api.cn` or `https://alpha1.api.cn`
 >
-> http api.test.cn X-Tag:beta -v # 请求会被转分发到`http://beta.api.cn`
+> http api.test.cn X-DISPATCH:beta -v # the request will be dispatch to `https://beta.api.cn`
 >
-> http api.test.cn X-Tag:whoami -v # 请求不会被分发
+> http api.test.cn X-DISPATCH:whoami -v # the request will not be dispatch

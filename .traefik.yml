@@ -1,15 +1,15 @@
 displayName: request dispatch
 type: middleware
 import: github.com/qxsugar/request-dispatch
-summary: a requests dispatch plugin
+summary: According to the request mark to do request dispatch, to achieve gray function
 
 testData:
   request-dispatch:
     logLevel: DEBUG
-    markHeader: X-Tag
+    markHeader: X-DISPATCH
     markHosts:
       alpha:
-        - http://alpha.api.com
-        - http://alpha1.api.com
+        - https://alpha.example.com
+        - https://alpha01.example.com
       beta:
-        - http://beta.api.com
+        - https://beta.api.com
