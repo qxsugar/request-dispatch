@@ -46,7 +46,7 @@ http:
               - https://beta.api.cn
 ```
 
-## 使用
+## used
 
 If the request header takes the mark header parameter, the request will be dispatch to the appropriate address
 
