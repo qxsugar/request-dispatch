@@ -1,7 +1,7 @@
 displayName: request dispatch
 type: middleware
 import: github.com/qxsugar/request-dispatch
-summary: According to the request mark to do request dispatch, to achieve gray function
+summary: Based on request markers, our plugin performs intelligent request dispatching, enabling seamless gray-scale functionality. This is achieved by routing traffic according to the markers specified in the requests, thereby providing a robust solution for controlled feature rollouts and system upgrades
 
 testData:
   request-dispatch:

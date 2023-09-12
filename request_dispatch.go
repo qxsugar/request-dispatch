@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"sync"
+	"time"
 )
 
 type Config struct {
@@ -22,6 +24,8 @@ type Dispatch struct {
 	logger *Logger
 	config *Config
 	next   http.Handler
+	rand   *rand.Rand
+	mu     sync.Mutex
 }
 
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
@@ -29,6 +33,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		logger: NewLogger(config.LogLevel),
 		config: config,
 		next:   next,
+		rand:   rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 
 	return plugin, nil
@@ -38,7 +43,9 @@ func (d *Dispatch) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	markValue := req.Header.Get(d.config.MarkHeader)
 	if markValue != "" {
 		if hosts, ok := d.config.MarkHosts[markValue]; ok {
-			host := hosts[rand.Intn(len(hosts))]
+			d.mu.Lock()
+			host := hosts[d.rand.Intn(len(hosts))]
+			d.mu.Unlock()
 			target, err := url.ParseRequestURI(host)
 			if err == nil {
 				d.reverseProxy(rw, req, target)
@@ -66,4 +73,9 @@ func (d *Dispatch) reverseProxy(rw http.ResponseWriter, req *http.Request, targe
 		d.next.ServeHTTP(rw, req)
 	}
 	proxy.ServeHTTP(rw, req)
+}
+
+func (d *Dispatch) Close() error {
+	// Close your logger and any other resources.
+	return nil
 }

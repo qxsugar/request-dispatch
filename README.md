@@ -1,11 +1,18 @@
-traefik request dispatch plug-in
-------------------
+# Traefik Request Dispatch Plugin
 
-According to the request mark to do request dispatch, to achieve gray function
+The Traefik Request Dispatch Plugin is a powerful tool that allows for intelligent request dispatching based on request markers, facilitating the implementation of gray-scale functionality.
 
-## configuration
+## Features
 
-1. configuration plug-in configuration
+- Intelligent request routing based on request markers
+- Enables gray-scale deployments, controlled feature rollouts, and system upgrades
+- Easy to configure and use with Traefik
+
+## Configuration
+
+### Plugin Configuration
+
+To configure the plugin, add the following to your Traefik configuration file:
 
 ```yaml
 experimental:
@@ -15,7 +22,9 @@ experimental:
       version: v1.0.1
 ```
 
-2. route configuration
+### Route Configuration
+
+Configure your routes as shown in the example below:
 
 ```yaml
 http:
@@ -46,12 +55,12 @@ http:
               - https://beta.api.cn
 ```
 
-## used
+## Usage
 
-If the request header takes the mark header parameter, the request will be dispatch to the appropriate address
+If the request header includes the mark header parameter, the request will be dispatched to the appropriate address:
 
-> http api.test.cn X-DISPATCH:alpha -v # the request will be dispatch to `https://alpha.api.cn` or `https://alpha1.api.cn`
->
-> http api.test.cn X-DISPATCH:beta -v # the request will be dispatch to `https://beta.api.cn`
->
-> http api.test.cn X-DISPATCH:whoami -v # the request will not be dispatch
+- `http api.test.cn X-DISPATCH:alpha -v` The request will be dispatched to `https://alpha.api.cn` or `https://alpha1.api.cn`
+- `http api.test.cn X-DISPATCH:beta -v` The request will be dispatched to `https://beta.api.cn`
+- `http api.test.cn X-DISPATCH:whoami -v` The request will not be dispatched
+
+This plugin provides a flexible and powerful way to manage your request traffic, enabling you to control how and where requests are dispatched based on their marker headers.
