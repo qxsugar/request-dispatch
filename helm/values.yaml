@@ -1,0 +1,9 @@
+requestDispatch:
+  logLevel: DEBUG
+  markHeader: X-DISPATCH
+  markHosts:
+    alpha:
+      - "https://alpha.example.com"
+      - "https://alpha01.example.com"
+    beta:
+      - "https://beta.api.com"
