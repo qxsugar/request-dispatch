@@ -19,7 +19,7 @@ experimental:
   plugins:
     request-dispatch:
       moduleName: github.com/qxsugar/request-dispatch
-      version: v1.0.1
+      version: v1.0.2
 ```
 
 ## 配置
