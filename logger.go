@@ -3,6 +3,7 @@ package request_dispatch
 import (
 	"log"
 	"os"
+	"strings"
 )
 
 type LogLevel int
@@ -13,9 +14,9 @@ const (
 	LogLevelError = LogLevel(1)
 )
 
-// Logger
-// traefik disables unsafe and syscall, which makes many logger libraries unusable
-// Ref https://github.com/tomMoulard/fail2ban/blob/main/fail2ban.go#L35-L38 a simple logger is implemented
+// Logger provides a simple logging interface.
+// Traefik disables unsafe and syscall, limiting standard logger library options.
+// Ref: https://github.com/tomMoulard/fail2ban/blob/main/fail2ban.go#L35-L38
 type Logger struct {
 	logLevel    LogLevel
 	loggerInfo  *log.Logger
@@ -42,7 +43,7 @@ func (l *Logger) Error(args ...interface{}) {
 }
 
 func getLogLevel(level string) LogLevel {
-	switch level {
+	switch strings.ToUpper(level) {
 	case "DEBUG":
 		return LogLevelDebug
 	case "INFO":

@@ -2,6 +2,7 @@ package request_dispatch
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"net/http"
 	"net/http/httputil"
@@ -20,62 +21,94 @@ func CreateConfig() *Config {
 	return &Config{}
 }
 
-type Dispatch struct {
-	logger *Logger
-	config *Config
-	next   http.Handler
-	rand   *rand.Rand
-	mu     sync.Mutex
+type RequestDispatcher struct {
+	logger        *Logger
+	config        *Config
+	next          http.Handler
+	randSource    *rand.Rand
+	randMutex     sync.Mutex
+	reverseProxies map[string]*httputil.ReverseProxy
 }
 
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
-	plugin := &Dispatch{
-		logger: NewLogger(config.LogLevel),
-		config: config,
-		next:   next,
-		rand:   rand.New(rand.NewSource(time.Now().UnixNano())),
+	if err := validateConfig(config); err != nil {
+		return nil, err
 	}
 
-	return plugin, nil
+	reverseProxies := make(map[string]*httputil.ReverseProxy)
+	for _, hosts := range config.MarkHosts {
+		for _, host := range hosts {
+			target, err := url.ParseRequestURI(host)
+			if err != nil {
+				return nil, err
+			}
+			reverseProxies[host] = httputil.NewSingleHostReverseProxy(target)
+		}
+	}
+
+	dispatcher := &RequestDispatcher{
+		logger:         NewLogger(config.LogLevel),
+		config:         config,
+		next:           next,
+		randSource:     rand.New(rand.NewSource(time.Now().UnixNano())),
+		reverseProxies: reverseProxies,
+	}
+
+	return dispatcher, nil
 }
 
-func (d *Dispatch) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (d *RequestDispatcher) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	markValue := req.Header.Get(d.config.MarkHeader)
 	if markValue != "" {
 		if hosts, ok := d.config.MarkHosts[markValue]; ok {
-			d.mu.Lock()
-			host := hosts[d.rand.Intn(len(hosts))]
-			d.mu.Unlock()
-			target, err := url.ParseRequestURI(host)
-			if err == nil {
-				d.reverseProxy(rw, req, target)
+			d.randMutex.Lock()
+			host := hosts[d.randSource.Intn(len(hosts))]
+			d.randMutex.Unlock()
+			if proxy, ok := d.reverseProxies[host]; ok {
+				d.proxyRequest(rw, req, host, proxy)
 				return
-			} else {
-				d.logger.Error("failed to parse request uri, uri: ", host, "error: ", err)
 			}
 		}
 	}
 
 	// default router
 	d.next.ServeHTTP(rw, req)
-	return
 }
 
-func (d *Dispatch) reverseProxy(rw http.ResponseWriter, req *http.Request, target *url.URL) {
+func (d *RequestDispatcher) proxyRequest(rw http.ResponseWriter, req *http.Request, host string, proxy *httputil.ReverseProxy) {
+	target, _ := url.ParseRequestURI(host)
 	d.logger.Debug("reverse proxy, from: ", req.URL, "to: ", target)
 
-	// replace the host of request, otherwise it will cause incorrect parsing
+	// Set request host to target host for correct URL parsing in reverse proxy
 	req.Host = target.Host
-	// FIXME cache proxy?
-	proxy := httputil.NewSingleHostReverseProxy(target)
 	proxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, err error) {
-		d.logger.Error("failed to reverse proxy, will be use default ServeHTTP, error: ", err)
+		d.logger.Error("failed to reverse proxy, will use default ServeHTTP, error: ", err)
 		d.next.ServeHTTP(rw, req)
 	}
 	proxy.ServeHTTP(rw, req)
 }
 
-func (d *Dispatch) Close() error {
-	// Close your logger and any other resources.
+func validateConfig(config *Config) error {
+	if config.MarkHeader == "" {
+		return nil
+	}
+	if len(config.MarkHosts) == 0 {
+		return nil
+	}
+	for mark, hosts := range config.MarkHosts {
+		if len(hosts) == 0 {
+			return fmt.Errorf("mark '%s' has no hosts configured", mark)
+		}
+		for _, host := range hosts {
+			if _, err := url.ParseRequestURI(host); err != nil {
+				return fmt.Errorf("invalid URL for mark '%s': %s, error: %w", mark, host, err)
+			}
+		}
+	}
+	return nil
+}
+
+func (d *RequestDispatcher) Close() error {
+	// Close releases any resources held by the dispatcher.
 	return nil
 }

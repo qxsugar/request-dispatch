@@ -1,15 +1,17 @@
-displayName: request dispatch
+displayName: Request Dispatch
 type: middleware
 import: github.com/qxsugar/request-dispatch
-summary: Based on request markers, our plugin performs intelligent request dispatching, enabling seamless gray-scale functionality. This is achieved by routing traffic according to the markers specified in the requests, thereby providing a robust solution for controlled feature rollouts and system upgrades
+summary: Intelligent request routing middleware for Traefik that enables gray-scale deployments and controlled feature rollouts by dispatching requests to different backend services based on request markers (headers).
 
 testData:
   request-dispatch:
     logLevel: DEBUG
-    markHeader: X-DISPATCH
+    markHeader: X-Dispatch-Mark
     markHosts:
-      alpha:
-        - https://alpha.example.com
-        - https://alpha01.example.com
-      beta:
-        - https://beta.api.com
+      canary:
+        - https://canary-v2.api.example.com
+        - https://canary-v2-backup.api.example.com
+      staging:
+        - https://staging.api.example.com
+      production:
+        - https://prod.api.example.com

@@ -21,7 +21,7 @@ func TestDispatch(t *testing.T) {
 		w.Write([]byte("default handler"))
 	})
 
-	disp, err := New(context.Background(), nextHandler, config, "test")
+	dispatcher, err := New(context.Background(), nextHandler, config, "test")
 	assert.NoError(t, err)
 
 	t.Run("test dispatch with mark header", func(t *testing.T) {
@@ -29,7 +29,7 @@ func TestDispatch(t *testing.T) {
 		req.Header.Set("X-Test-Header", "test")
 		rr := httptest.NewRecorder()
 
-		disp.ServeHTTP(rr, req)
+		dispatcher.ServeHTTP(rr, req)
 
 		// Check if the request was dispatched to the correct host
 		assert.Equal(t, "localhost:8080", req.Host)
@@ -39,7 +39,7 @@ func TestDispatch(t *testing.T) {
 		req := httptest.NewRequest("GET", "http://localhost:9000", nil)
 		rr := httptest.NewRecorder()
 
-		disp.ServeHTTP(rr, req)
+		dispatcher.ServeHTTP(rr, req)
 
 		// Check if the request was routed to the default handler
 		assert.Equal(t, "default handler", rr.Body.String())
